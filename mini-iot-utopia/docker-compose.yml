@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongo:
+    image: mongo:7
+    container_name: iot-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: mini-iot-utopia
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - iot-network
+
+  # MQTT Broker (Mosquitto)
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: iot-mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_logs:/mosquitto/log
+    networks:
+      - iot-network
+
+  # Backend API Server
+  backend:
+    build: ./backend
+    container_name: iot-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - MONGO_URI=mongodb://mongo:27017/mini-iot-utopia
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - MQTT_URL=mqtt://mosquitto:1883
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongo
+      - mosquitto
+    volumes:
+      - ./backend/.env:/app/.env:ro
+    networks:
+      - iot-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend (for production)
+  frontend:
+    build: .
+    container_name: iot-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - iot-network
+
+# Volumes
+volumes:
+  mongo_data:
+    driver: local
+  mosquitto_data:
+    driver: local
+  mosquitto_logs:
+    driver: local
+
+# Networks
+networks:
+  iot-network:
+    driver: bridge
