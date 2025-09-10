@@ -1,0 +1,31 @@
+{
+  "name": "mini-iot-utopia-backend",
+  "version": "1.0.0",
+  "description": "Backend server for Mini IoT Utopia platform",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.3",
+    "mqtt": "^5.3.4",
+    "socket.io": "^4.7.4",
+    "jsonwebtoken": "^9.0.2",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.3.1",
+    "joi": "^17.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0"
+  },
+  "keywords": ["iot", "mqtt", "mongodb", "real-time", "telemetry"],
+  "author": "Your Name",
+  "license": "MIT"
+}
