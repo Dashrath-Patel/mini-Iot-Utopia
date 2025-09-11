@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # MongoDB Database
   mongo:
@@ -33,7 +31,7 @@ services:
     networks:
       - iot-network
 
-  # Backend API Server
+  # Backend API Server //Add you mongo db uri
   backend:
     build: ./backend
     container_name: iot-backend
@@ -41,7 +39,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - MONGO_URI=mongodb://mongo:27017/mini-iot-utopia
+      - MONGO_URI=mongodb+srv://user:password@cluster0.tllidua.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0  
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       - MQTT_URL=mqtt://mosquitto:1883
       - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
